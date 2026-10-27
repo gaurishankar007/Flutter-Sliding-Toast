@@ -69,6 +69,12 @@ class const SlidingToastSetting({
 
   /// The setting for the dialog shown when [showDialogOnTap] is true.
   final ToastDialogSetting dialogSetting = const ToastDialogSetting(),
+
+  /// Whether to show a badge with the number of toasts waiting behind
+  /// this one, queued in `ToastDisplayMode.oneByOne` or stacked
+  /// in `ToastDisplayMode.stacked`.
+  /// Default is true
+  final bool showPendingCount = true,
 }) {
   SlidingToastSetting copyWith({
     double? maxWidth,
@@ -85,6 +91,7 @@ class const SlidingToastSetting({
     EdgeInsets? padding,
     bool? showDialogOnTap,
     ToastDialogSetting? dialogSetting,
+    bool? showPendingCount,
   }) {
     return SlidingToastSetting(
       maxWidth: maxWidth ?? this.maxWidth,
@@ -101,6 +108,7 @@ class const SlidingToastSetting({
       padding: padding ?? this.padding,
       showDialogOnTap: showDialogOnTap ?? this.showDialogOnTap,
       dialogSetting: dialogSetting ?? this.dialogSetting,
+      showPendingCount: showPendingCount ?? this.showPendingCount,
     );
   }
 }

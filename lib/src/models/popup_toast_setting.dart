@@ -68,6 +68,12 @@ class const PopupToastSetting({
 
   /// The setting for the dialog shown when [showDialogOnTap] is true.
   final ToastDialogSetting dialogSetting = const ToastDialogSetting(),
+
+  /// Whether to show a badge with the number of toasts waiting behind
+  /// this one, queued in `ToastDisplayMode.oneByOne` or stacked
+  /// in `ToastDisplayMode.stacked`.
+  /// Default is true
+  final bool showPendingCount = true,
 }) {
   PopupToastSetting copyWith({
     double? maxWidth,
@@ -84,6 +90,7 @@ class const PopupToastSetting({
     EdgeInsets? padding,
     bool? showDialogOnTap,
     ToastDialogSetting? dialogSetting,
+    bool? showPendingCount,
   }) {
     return PopupToastSetting(
       maxWidth: maxWidth ?? this.maxWidth,
@@ -100,6 +107,7 @@ class const PopupToastSetting({
       padding: padding ?? this.padding,
       showDialogOnTap: showDialogOnTap ?? this.showDialogOnTap,
       dialogSetting: dialogSetting ?? this.dialogSetting,
+      showPendingCount: showPendingCount ?? this.showPendingCount,
     );
   }
 }

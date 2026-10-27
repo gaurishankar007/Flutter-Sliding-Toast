@@ -11,6 +11,16 @@ void main() {
       expect(setting.animationDuration, const Duration(milliseconds: 500));
     });
 
+    test('shows the pending count by default', () {
+      expect(const PopupToastSetting().showPendingCount, isTrue);
+      expect(
+        const PopupToastSetting()
+            .copyWith(showPendingCount: false)
+            .showPendingCount,
+        isFalse,
+      );
+    });
+
     test('copyWith overrides only the given fields', () {
       const setting = PopupToastSetting();
       final updated = setting.copyWith(

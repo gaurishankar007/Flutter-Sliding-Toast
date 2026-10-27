@@ -140,4 +140,97 @@ void main() {
     await tester.pump();
     expect(find.text('three'), findsOneWidget);
   });
+
+  group('pending count', () {
+    testWidgets('counts the queued toasts and shows it on the shown one', (
+      tester,
+    ) async {
+      await pumpApp(tester);
+      InteractiveToast.setDisplayMode(.oneByOne);
+
+      final first = slide('one');
+      expect(InteractiveToast.pendingCount.value, 0);
+      await tester.pump();
+      expect(find.textContaining('+'), findsNothing);
+
+      slide('two');
+      slide('three');
+      expect(InteractiveToast.pendingCount.value, 2);
+      await tester.pump();
+      expect(find.text('+2'), findsOneWidget);
+
+      first.closeToast();
+      expect(InteractiveToast.pendingCount.value, 1);
+      await tester.pump();
+      expect(find.text('+1'), findsOneWidget);
+    });
+
+    testWidgets('closing a queued toast lowers the count', (tester) async {
+      await pumpApp(tester);
+      InteractiveToast.setDisplayMode(.oneByOne);
+
+      slide('one');
+      final second = slide('two');
+      slide('three');
+      second.closeToast();
+
+      expect(InteractiveToast.pendingCount.value, 1);
+    });
+
+    testWidgets('closeAllToast resets the count', (tester) async {
+      await pumpApp(tester);
+      InteractiveToast.setDisplayMode(.oneByOne);
+
+      slide('one');
+      slide('two');
+      InteractiveToast.closeAllToast();
+
+      expect(InteractiveToast.pendingCount.value, 0);
+    });
+
+    testWidgets('is not shown on toasts shown all at once', (tester) async {
+      await pumpApp(tester);
+
+      slide('one', displayMode: .oneByOne);
+      slide('two', displayMode: .oneByOne);
+      slide('three');
+      await tester.pump();
+
+      expect(find.text('+1'), findsOneWidget);
+    });
+
+    testWidgets('keeps the count readable on a white badge', (tester) async {
+      await pumpApp(tester);
+
+      for (final text in ['one', 'two']) {
+        InteractiveToast.slide(
+          context: capturedContext,
+          title: Text(text),
+          displayMode: .oneByOne,
+          toastStyle: const ToastStyle(progressBarColor: Colors.white),
+        );
+      }
+      await tester.pump();
+
+      final count = tester.widget<Text>(find.text('+1'));
+      expect(count.style?.color, Colors.black87);
+    });
+
+    testWidgets('is hidden when showPendingCount is false', (tester) async {
+      await pumpApp(tester);
+
+      for (final text in ['one', 'two']) {
+        InteractiveToast.pop(
+          context: capturedContext,
+          title: Text(text),
+          displayMode: .oneByOne,
+          toastSetting: const PopupToastSetting(showPendingCount: false),
+        );
+      }
+      await tester.pump();
+
+      expect(InteractiveToast.pendingCount.value, 1);
+      expect(find.text('+1'), findsNothing);
+    });
+  });
 }

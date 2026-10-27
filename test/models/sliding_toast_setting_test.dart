@@ -8,6 +8,16 @@ void main() {
       expect(setting.toastStartPosition, ToastPosition.bottom);
     });
 
+    test('shows the pending count by default', () {
+      expect(const SlidingToastSetting().showPendingCount, isTrue);
+      expect(
+        const SlidingToastSetting()
+            .copyWith(showPendingCount: false)
+            .showPendingCount,
+        isFalse,
+      );
+    });
+
     test('copyWith overrides only the given fields', () {
       const setting = SlidingToastSetting();
       final updated = setting.copyWith(

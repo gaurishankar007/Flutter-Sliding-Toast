@@ -14,10 +14,13 @@ void main() {
       final updated = style.copyWith(
         backgroundColor: const Color(0xFF112233),
         expandedTitle: false,
+        pendingCountColor: const Color(0xFF445566),
       );
 
       expect(updated.backgroundColor, const Color(0xFF112233));
       expect(updated.expandedTitle, isFalse);
+      expect(updated.pendingCountColor, const Color(0xFF445566));
+      expect(updated.pendingCountTextColor, isNull);
       expect(updated.borderRadius, style.borderRadius);
       expect(updated.titleLeadingGap, style.titleLeadingGap);
     });

@@ -1,3 +1,8 @@
+## 1.8.0
+
+- Added `ToastDisplayMode.stacked` to show toasts like notifications: every toast shows right away, the first one in front and the later ones at the same alignment peeking out behind it. Only the toast in front counts down, the next one coming forward when it closes, and tapping the toasts behind spreads the stack out, pausing every toast until it's collapsed by tapping outside. The toast in front shows a badge with the number of toasts behind it.
+- In `ToastDisplayMode.oneByOne`, the toast on screen shows a badge with the number of toasts waiting behind it, readable on any badge color. Turn it off with `showPendingCount` in `SlidingToastSetting`/`PopupToastSetting`, style it with `pendingCountColor`/`pendingCountTextColor` in `ToastStyle`, or listen to `InteractiveToast.pendingCount` to build your own indicator.
+
 ## 1.7.0
 
 - Added `ToastDisplayMode` to show toasts all at once (`allAtOnce`, the default and the previous behavior) or one by one (`oneByOne`), where a new toast waits in a queue until the one on screen is closed. Set it for every toast with `InteractiveToast.setDisplayMode`, or per toast with the `displayMode` parameter of `slide`/`pop`.

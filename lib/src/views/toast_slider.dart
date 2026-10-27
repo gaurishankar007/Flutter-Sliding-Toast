@@ -1,10 +1,14 @@
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/widgets.dart';
 
 import 'package:flutter_sliding_toast/flutter_sliding_toast.dart';
+import 'package:flutter_sliding_toast/src/core/toast_stack.dart';
 import 'package:flutter_sliding_toast/src/views/toast_dialog.dart';
 import 'package:flutter_sliding_toast/src/widgets/toast_container_widget.dart';
+import 'package:flutter_sliding_toast/src/widgets/toast_pending_count_widget.dart';
 import 'package:flutter_sliding_toast/src/widgets/toast_position_widget.dart';
 import 'package:flutter_sliding_toast/src/widgets/toast_progress_bar_widget.dart';
+import 'package:flutter_sliding_toast/src/widgets/toast_stack_widget.dart';
 
 /// A sliding message to show the toast
 class const ToastSlider({
@@ -34,6 +38,13 @@ class const ToastSlider({
 
   /// Function to be called when the toast is clicked
   final void Function()? onTapped,
+
+  /// The number of toasts waiting behind this one,
+  /// given only when it's shown one by one
+  final ValueListenable<int>? pendingCount,
+
+  /// The stack the toast is shown in, given only when it's stacked
+  final ToastStack? stack,
 }) extends StatefulWidget {
   @override
   State<ToastSlider> createState() => _ToastSliderState();
@@ -50,6 +61,10 @@ class _ToastSliderState extends State<ToastSlider>
 
   /// Is the toast clicked by the user
   bool isToastTapped = false;
+
+  /// Whether the toast may count down, false while it's behind
+  /// another toast in its stack or the stack is spread out
+  bool isActive = true;
 
   @override
   void initState() {
@@ -83,10 +98,14 @@ class _ToastSliderState extends State<ToastSlider>
     // Start the animation
     slideController.forward();
 
-    // Start the size animation and listen animation is completed or not to remove the overlay
-    sizeController
-      ..forward()
-      ..addStatusListener(animationListener);
+    // Start the size animation, unless the toast is behind another one,
+    // and listen animation is completed or not to remove the overlay
+    widget.stack?.addListener(onStackChanged);
+    isActive = widget.stack?.isActive(widget.toastController.id) ?? true;
+    sizeController.addStatusListener(animationListener);
+    if (isActive) {
+      sizeController.forward();
+    }
   }
 
   Future<void> animationListener(AnimationStatus status) async {
@@ -98,6 +117,21 @@ class _ToastSliderState extends State<ToastSlider>
 
       // Remove the overlay entry
       widget.toastController.closeToast();
+    }
+  }
+
+  /// Pauses the toast while it's behind another one in the stack
+  /// or the stack is spread out, resuming it once it's back in front.
+  void onStackChanged() {
+    final isActive = widget.stack!.isActive(widget.toastController.id);
+    if (isActive == this.isActive) {
+      return;
+    }
+    this.isActive = isActive;
+    if (isActive) {
+      sizeController.forward();
+    } else {
+      sizeController.stop();
     }
   }
 
@@ -114,13 +148,14 @@ class _ToastSliderState extends State<ToastSlider>
       dialogSetting: toastSetting.dialogSetting,
       toastMaxWidth: toastSetting.maxWidth,
     );
-    if (mounted) {
+    if (mounted && isActive) {
       sizeController.forward();
     }
   }
 
   @override
   void dispose() {
+    widget.stack?.removeListener(onStackChanged);
     slideController.dispose();
     sizeController.dispose();
     super.dispose();
@@ -164,40 +199,99 @@ class _ToastSliderState extends State<ToastSlider>
       );
     }
 
-    return ToastPositionWidget(
+    // Show the number of toasts waiting in the queue or stack behind this one
+    final pendingCount = widget.pendingCount;
+    final stack = widget.stack;
+    final toastId = widget.toastController.id;
+    final (Listenable, int Function())? countSource = switch ((
+      pendingCount,
+      stack,
+    )) {
+      (final pendingCount?, _) => (pendingCount, () => pendingCount.value),
+      (_, final stack?) => (stack, () => stack.countBehind(toastId)),
+      _ => null,
+    };
+    if (countSource != null && toastSetting.showPendingCount) {
+      child = Stack(
+        clipBehavior: .none,
+        children: [
+          child,
+          Positioned(
+            top: -8,
+            right: -8,
+            child: ToastPendingCountWidget(
+              listenable: countSource.$1,
+              count: countSource.$2,
+              toastStyle: toastStyle,
+            ),
+          ),
+        ],
+      );
+    }
+
+    child = Dismissible(
+      key: UniqueKey(),
+      // A stacked toast is removed right away, the stack moving up itself
+      resizeDuration: widget.stack == null
+          ? const Duration(milliseconds: 300)
+          : null,
+      direction: toastSetting.toastStartPosition.dismissDirection(),
+      // Stop animations and remove the overlay on dismissed
+      onDismissed: (_) {
+        sizeController.stop();
+        widget.toastController.closeToast();
+      },
+      child: GestureDetector(
+        // Execute onTapped function on tap
+        onTap: () {
+          if (isToastTapped) {
+            return;
+          }
+          if (toastSetting.disableMultiTapping) {
+            isToastTapped = true;
+          }
+          widget.onTapped?.call();
+          if (toastSetting.showDialogOnTap) {
+            showDialog();
+          }
+        },
+        // Pause the animation on long press
+        onLongPress: () => sizeController.stop(),
+        // Forward the animation when long press ends
+        onLongPressEnd: (details) {
+          if (isActive) {
+            sizeController.forward();
+          }
+        },
+        child: SlideTransition(position: slideAnimation, child: child),
+      ),
+    );
+
+    // Place the toast in its stack
+    if (stack != null) {
+      child = ToastStackCardWidget(
+        stack: stack,
+        toastId: toastId,
+        child: child,
+      );
+    }
+
+    child = ToastPositionWidget(
       alignment: toastSetting.toastAlignment,
       padding: toastSetting.padding,
       newMaxHeight: toastSetting.maxHeight,
       newMaxWidth: toastSetting.maxWidth,
-      child: Dismissible(
-        key: UniqueKey(),
-        direction: toastSetting.toastStartPosition.dismissDirection(),
-        // Stop animations and remove the overlay on dismissed
-        onDismissed: (_) {
-          sizeController.stop();
-          widget.toastController.closeToast();
-        },
-        child: GestureDetector(
-          // Execute onTapped function on tap
-          onTap: () {
-            if (isToastTapped) {
-              return;
-            }
-            if (toastSetting.disableMultiTapping) {
-              isToastTapped = true;
-            }
-            widget.onTapped?.call();
-            if (toastSetting.showDialogOnTap) {
-              showDialog();
-            }
-          },
-          // Pause the animation on long press
-          onLongPress: () => sizeController.stop(),
-          // Forward the animation when long press ends
-          onLongPressEnd: (details) => sizeController.forward(),
-          child: SlideTransition(position: slideAnimation, child: child),
-        ),
-      ),
+      child: child,
     );
+
+    if (stack != null) {
+      child = ToastStackOffsetWidget(
+        stack: stack,
+        toastId: toastId,
+        child: child,
+      );
+    }
+
+    return child;
   }
 }

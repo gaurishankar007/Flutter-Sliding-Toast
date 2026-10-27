@@ -58,6 +58,15 @@ class const ToastStyle({
   /// Default is [Theme.of(context).primaryColor]
   final Color? progressBarColor,
 
+  /// The background color of the badge counting the toasts waiting behind
+  /// the toast in `ToastDisplayMode.oneByOne` and `ToastDisplayMode.stacked`.
+  /// Default is [progressBarColor], then [Theme.of(context).primaryColor]
+  final Color? pendingCountColor,
+
+  /// The text color of the badge counting the waiting toasts.
+  /// Default is white on a dark badge and black on a light one
+  final Color? pendingCountTextColor,
+
   /// The width of the title widget expanding to the available width.
   /// Default is true
   /// * If progress bar is enabled, then title will be always expanded
@@ -80,6 +89,8 @@ class const ToastStyle({
     BorderRadius? borderRadius,
     Border? border,
     Color? progressBarColor,
+    Color? pendingCountColor,
+    Color? pendingCountTextColor,
     bool? expandedTitle,
     CrossAxisAlignment? widgetCrossAxisAlignment,
   }) {
@@ -97,6 +108,9 @@ class const ToastStyle({
       borderRadius: borderRadius ?? this.borderRadius,
       border: border ?? this.border,
       progressBarColor: progressBarColor ?? this.progressBarColor,
+      pendingCountColor: pendingCountColor ?? this.pendingCountColor,
+      pendingCountTextColor:
+          pendingCountTextColor ?? this.pendingCountTextColor,
       expandedTitle: expandedTitle ?? this.expandedTitle,
       widgetCrossAxisAlignment:
           widgetCrossAxisAlignment ?? this.widgetCrossAxisAlignment,

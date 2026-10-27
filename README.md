@@ -49,7 +49,7 @@ Add the following line to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_sliding_toast: ^1.7.0
+  flutter_sliding_toast: ^1.8.0
 ```
 
 ## 🚀 Usage
@@ -145,7 +145,7 @@ class MyHomePage extends StatelessWidget {
 
 ### Showing toasts one by one
 
-By default every toast shows right away, stacking on the ones already on screen. Show them one at a time instead, each waiting for the previous one to close:
+By default every toast shows right away, drawn over the ones already on screen. Show them one at a time instead, each waiting for the previous one to close:
 
 ```dart
 // For every toast
@@ -160,6 +160,22 @@ InteractiveToast.slide(
 ```
 
 `closeAllToast` closes the toast on screen and drops the ones waiting in the queue.
+
+A badge on the toast's corner shows how many toasts are waiting behind it (`+2`), so users know there is more to read. Hide it with `showPendingCount: false` in the toast setting, color it with `pendingCountColor` and `pendingCountTextColor` in `ToastStyle`, or build your own indicator by listening to `InteractiveToast.pendingCount`.
+
+### Stacking toasts like notifications
+
+Show every toast right away, the first one in front and the later ones peeking out behind it, like notifications on a phone:
+
+```dart
+InteractiveToast.setDisplayMode(ToastDisplayMode.stacked);
+```
+
+- Only the toast in front counts down; when it closes, the next one comes forward in the order they were shown.
+- The toast in front shows how many toasts are behind it with the same badge as above (`showPendingCount`).
+- Up to three toasts are visible; the rest stay hidden until the ones in front close.
+- Tapping a toast behind spreads the stack out, one below another, and pauses every toast. Tap outside the toasts to collapse it again.
+- Toasts with a different alignment get a stack of their own.
 
 ### Showing long messages in a dialog
 

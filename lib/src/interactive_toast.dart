@@ -1,6 +1,8 @@
 import 'dart:collection' show Queue;
 
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter_sliding_toast/flutter_sliding_toast.dart';
+import 'package:flutter_sliding_toast/src/core/toast_stack.dart';
 import 'package:flutter_sliding_toast/src/core/unique_string_generator.dart';
 import 'package:flutter_sliding_toast/src/views/toast_popup.dart';
 import 'package:flutter_sliding_toast/src/views/toast_slider.dart';
@@ -15,8 +17,8 @@ class _ToastEntry(
   bool isInserted = false;
   bool isClosed = false;
 
-  void insert() {
-    overlayState.insert(overlayEntry);
+  void insert({OverlayEntry? below}) {
+    overlayState.insert(overlayEntry, below: below);
     isInserted = true;
   }
 }
@@ -32,6 +34,16 @@ class const InteractiveToast._() {
 
   /// The one-by-one toast on screen, holding back the pending ones.
   static _ToastEntry? _shownToast;
+
+  static final _pendingCount = ValueNotifier<int>(0);
+
+  /// The stacks of [ToastDisplayMode.stacked] toasts,
+  /// one for each overlay and alignment.
+  static final _stacks = <(OverlayState, Alignment), ToastStack>{};
+
+  /// The number of toasts waiting for their turn
+  /// in [ToastDisplayMode.oneByOne].
+  static ValueListenable<int> get pendingCount => _pendingCount;
 
   /// Initialize context early so that toasts can be shown without context later.
   static void initializeContext(BuildContext context) => _context = context;
@@ -57,7 +69,13 @@ class const InteractiveToast._() {
     required BuildContext? context,
     required OverlayState? overlayState,
     required ToastDisplayMode? displayMode,
-    required Widget Function(ToastController toastController) builder,
+    required Alignment alignment,
+    required Widget Function(
+      ToastController toastController,
+      ValueListenable<int>? pendingCount,
+      ToastStack? stack,
+    )
+    builder,
     required void Function()? onDisposed,
   }) {
     /// Updating global values if they are configured before
@@ -76,12 +94,31 @@ class const InteractiveToast._() {
     }
 
     late final ToastController toastController;
+    final mode = displayMode ?? _displayMode;
 
     /// The overlay is resolved now, since it outlives a screen
     /// that pops before a queued toast's turn.
+    final overlay = resolvedOverlayState ?? Overlay.of(resolvedContext!);
+
+    final stackKey = (overlay, alignment);
+    ToastStack? stack;
+    if (mode == .stacked) {
+      _stacks.removeWhere((key, _) => !key.$1.mounted);
+      stack = _stacks.putIfAbsent(
+        stackKey,
+        () => ToastStack(overlay, alignment.y > 0),
+      );
+    }
+
     final toast = _ToastEntry(
-      resolvedOverlayState ?? Overlay.of(resolvedContext!),
-      OverlayEntry(builder: (context) => builder(toastController)),
+      overlay,
+      OverlayEntry(
+        builder: (context) => builder(
+          toastController,
+          mode == .oneByOne ? _pendingCount : null,
+          stack,
+        ),
+      ),
     );
 
     final String toastId = getUniqueString();
@@ -94,8 +131,16 @@ class const InteractiveToast._() {
         toast.isClosed = true;
 
         /// Removing toast from the queue and the list
-        _pendingToasts.remove(toast);
+        if (_pendingToasts.remove(toast)) {
+          _updatePendingCount();
+        }
         _toastControllers.removeWhere((e) => e.id == toastId);
+        if (stack != null) {
+          stack.remove(toastId);
+          if (stack.isEmpty && identical(_stacks[stackKey], stack)) {
+            _stacks.remove(stackKey);
+          }
+        }
 
         /// Removing the overlay, only a shown toast is disposed
         if (toast.isInserted) {
@@ -115,10 +160,12 @@ class const InteractiveToast._() {
     /// Adding toast to the list
     _toastControllers.add(toastController);
 
-    if ((displayMode ?? _displayMode) == .oneByOne) {
+    if (mode == .oneByOne) {
       _enqueue(toast);
     } else {
-      toast.insert();
+      final below = stack?.backEntry;
+      stack?.add(toastId, toast.overlayEntry);
+      toast.insert(below: below);
     }
 
     return toastController;
@@ -135,8 +182,13 @@ class const InteractiveToast._() {
     _pendingToasts.add(toast);
     if (_shownToast == null) {
       _showNextToast();
+    } else {
+      _updatePendingCount();
     }
   }
+
+  static void _updatePendingCount() =>
+      _pendingCount.value = _pendingToasts.length;
 
   /// Shows the next pending toast whose overlay is still around.
   static void _showNextToast() {
@@ -148,8 +200,9 @@ class const InteractiveToast._() {
 
       toast.insert();
       _shownToast = toast;
-      return;
+      break;
     }
+    _updatePendingCount();
   }
 
   /// If [overlayState] is provided, then [context] will not be used.
@@ -173,9 +226,12 @@ class const InteractiveToast._() {
       context: context,
       overlayState: overlayState,
       displayMode: displayMode,
+      alignment: toastSetting.toastAlignment,
       onDisposed: onDisposed,
-      builder: (toastController) => ToastSlider(
+      builder: (toastController, pendingCount, stack) => ToastSlider(
         toastController: toastController,
+        pendingCount: pendingCount,
+        stack: stack,
         leading: leading,
         title: title,
         dialogTitle: dialogTitle,
@@ -208,9 +264,12 @@ class const InteractiveToast._() {
       context: context,
       overlayState: overlayState,
       displayMode: displayMode,
+      alignment: toastSetting.toastAlignment,
       onDisposed: onDisposed,
-      builder: (toastController) => ToastPopup(
+      builder: (toastController, pendingCount, stack) => ToastPopup(
         toastController: toastController,
+        pendingCount: pendingCount,
+        stack: stack,
         leading: leading,
         title: title,
         dialogTitle: dialogTitle,
@@ -227,6 +286,7 @@ class const InteractiveToast._() {
     /// Dropping the queue first, so closing the shown toast
     /// doesn't bring in the next one
     _pendingToasts.clear();
+    _updatePendingCount();
     while (_toastControllers.isNotEmpty) {
       _toastControllers.removeFirst().closeToast();
     }
