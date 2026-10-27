@@ -11,17 +11,18 @@ Enhance your app's UI with customizable, interactive toasts! This package offers
 
 ## 🎨 Screenshots
 
-<div display="flex" flex-wrap="wrap" align="center">
-  <img src="https://res.cloudinary.com/gaurishankar/image/upload/v1732191907/Flutter%20Sliding%20Toast%20Pub%20Package/1_vh3h1t.gif" width="30%">
-  <img src="https://res.cloudinary.com/gaurishankar/image/upload/v1732191984/Flutter%20Sliding%20Toast%20Pub%20Package/2_fxo2o9.gif" width="30%">
-  <img src="https://res.cloudinary.com/gaurishankar/image/upload/v1732192053/Flutter%20Sliding%20Toast%20Pub%20Package/3_b55f5k.gif" width="30%">
-  <img src="https://res.cloudinary.com/gaurishankar/image/upload/v1732192053/Flutter%20Sliding%20Toast%20Pub%20Package/4_e7yapo.gif" width="30%">
-  <img src="https://res.cloudinary.com/gaurishankar/image/upload/v1732192053/Flutter%20Sliding%20Toast%20Pub%20Package/5_yk7oml.gif" width="30%">
-  <img src="https://res.cloudinary.com/gaurishankar/image/upload/v1732192050/Flutter%20Sliding%20Toast%20Pub%20Package/6_he2w8v.gif" width="30%">
-  <img src="https://res.cloudinary.com/gaurishankar/image/upload/v1732192052/Flutter%20Sliding%20Toast%20Pub%20Package/7_m1a4dr.gif" width="30%">
-  <img src="https://res.cloudinary.com/gaurishankar/image/upload/v1732192051/Flutter%20Sliding%20Toast%20Pub%20Package/8_mpcv6j.gif" width="30%">
-  <img src="https://res.cloudinary.com/gaurishankar/image/upload/v1732192054/Flutter%20Sliding%20Toast%20Pub%20Package/9_u4zuhh.gif" width="30%">
-</div>
+<table align="center">
+  <tr>
+    <td align="center"><img src="https://raw.githubusercontent.com/gaurishankar007/flutter_sliding_toast/master/doc/demo/sliding.webp" width="240" alt="Sliding toasts"><br>Sliding toasts</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/gaurishankar007/flutter_sliding_toast/master/doc/demo/status.webp" width="240" alt="Status toasts"><br>Status toasts</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/gaurishankar007/flutter_sliding_toast/master/doc/demo/popup.webp" width="240" alt="Popup toasts"><br>Popup toasts</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="https://raw.githubusercontent.com/gaurishankar007/flutter_sliding_toast/master/doc/demo/all_at_once.webp" width="240" alt="All at once"><br>All at once</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/gaurishankar007/flutter_sliding_toast/master/doc/demo/one_by_one.webp" width="240" alt="One by one"><br>One by one</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/gaurishankar007/flutter_sliding_toast/master/doc/demo/stacked.webp" width="240" alt="Stacked"><br>Stacked</td>
+  </tr>
+</table>
 
 ## 🎯 Features
 

@@ -1,0 +1,37 @@
+# Once this file exists, pub no longer reads .gitignore when publishing,
+# so everything ignored there is repeated here.
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Flutter/Dart/Pub related
+/pubspec.lock
+**/doc/api/
+.dart_tool/
+build/
+
+# Local Claude Code setup (rules + hooks), not shared
+CLAUDE.md
+.claude/
+
+# Demo clips for the README, served from GitHub instead of the package.
+# The pub.dev screenshots in doc/screenshots/ ship with the package.
+doc/demo/
+
+# Maintainer scripts
+tool/

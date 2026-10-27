@@ -6,6 +6,14 @@ repository: https://github.com/gaurishankar007/flutter_sliding_toast
 documentation: https://github.com/gaurishankar007/flutter_sliding_toast
 issue_tracker: https://github.com/gaurishankar007/flutter_sliding_toast/issues
 
+screenshots:
+  - description: "Stacked toasts with the first one in front and the later ones peeking out behind it."
+    path: doc/screenshots/stacked.webp
+  - description: "Toasts shown one by one, with a badge counting the ones waiting."
+    path: doc/screenshots/one_by_one.webp
+  - description: "Sliding toasts with a simple, a glassy, and an image-decorated style."
+    path: doc/screenshots/sliding.webp
+
 environment:
   sdk: ^3.13.0
   flutter: ">=3.47.0"
