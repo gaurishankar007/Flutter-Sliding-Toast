@@ -22,21 +22,18 @@ smaller than a GIF of the same quality. It needs OpenCV and Pillow (`pip3 instal
 Run it from the repository root:
 
 ```sh
-# README clips: 360 px wide, 15 fps
+# 540 px wide, 15 fps, quality 90, sharp at the README's 240 px on high-density screens
 python3 tool/mp4_to_webp.py ~/Desktop/sliding.mp4 doc/demo/sliding.webp
-
-# pub.dev screenshots ship with the package, so they're smaller: 280 px, 10 fps, quality 60
-python3 tool/mp4_to_webp.py ~/Desktop/stacked.mp4 doc/screenshots/stacked.webp 280 10 60
 ```
 
 With [ffmpeg](https://ffmpeg.org) installed, this does the same:
 
 ```sh
-ffmpeg -i sliding.mp4 -vf "fps=15,scale=360:-1" -loop 0 -quality 70 doc/demo/sliding.webp
+ffmpeg -i sliding.mp4 -vf "fps=15,scale=540:-1" -loop 0 -quality 90 doc/demo/sliding.webp
 ```
 
 ## pub.dev screenshots
 
 `doc/screenshots/` holds the screenshots listed under `screenshots:` in `pubspec.yaml`,
 shown in the gallery on pub.dev. Unlike the clips here, they ship with the package,
-so keep them few and small. Copy the matching clips there once they're recorded.
+so keep them few. They're copies of the matching clips here.

@@ -3,9 +3,9 @@
 Usage:
     python3 tool/mp4_to_webp.py IN.mp4 OUT.webp [WIDTH] [FPS] [QUALITY]
 
-    WIDTH    output width in pixels, the height keeps the aspect ratio (360)
+    WIDTH    output width in pixels, the height keeps the aspect ratio (540)
     FPS      frames per second sampled from the recording (15)
-    QUALITY  WebP quality from 0 to 100 (70)
+    QUALITY  WebP quality from 0 to 100 (90)
 
 Needs OpenCV and Pillow: pip3 install opencv-python pillow
 """
@@ -21,9 +21,9 @@ def main() -> None:
         sys.exit(__doc__)
 
     src, dst = sys.argv[1], sys.argv[2]
-    width = int(sys.argv[3]) if len(sys.argv) > 3 else 360
+    width = int(sys.argv[3]) if len(sys.argv) > 3 else 540
     fps = float(sys.argv[4]) if len(sys.argv) > 4 else 15
-    quality = int(sys.argv[5]) if len(sys.argv) > 5 else 70
+    quality = int(sys.argv[5]) if len(sys.argv) > 5 else 90
 
     cap = cv2.VideoCapture(src)
     src_fps = cap.get(cv2.CAP_PROP_FPS)
